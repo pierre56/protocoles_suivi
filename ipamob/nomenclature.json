@@ -1,0 +1,72 @@
+{
+  "types": [
+    {
+      "mnemonique": "COUVERTURE_NUAGEUSE",
+      "label_default": "Couverture nuageuse",
+      "definition_default": "couverture nuageuse (protocôle de suivi POPAmphibien)"
+    },
+    {
+      "mnemonique": "VENT",
+      "label_default": "Vent",
+      "definition_default": "vent (protocôle de suivi POPAmphibien)"
+    }
+  ],
+  "nomenclatures": [
+    {
+      "type":"COUVERTURE_NUAGEUSE",
+      "cd_nomenclature": "COUVERTURE_NUAGEUSE_1",
+      "mnemonique": "0-25",
+      "label_default": "0-25 %",
+      "definition_default": "0-25 %"
+    },
+    {
+      "type":"COUVERTURE_NUAGEUSE",
+      "cd_nomenclature": "COUVERTURE_NUAGEUSE_2",
+      "mnemonique": "25-50",
+      "label_default": "25-50 %",
+      "definition_default": "25-50 % "
+    },
+	{
+      "type":"COUVERTURE_NUAGEUSE",
+      "cd_nomenclature": "COUVERTURE_NUAGEUSE_3",
+      "mnemonique": "50-75",
+      "label_default": "50-75 %",
+      "definition_default": "50-75 %"
+    },
+	{
+      "type":"COUVERTURE_NUAGEUSE",
+      "cd_nomenclature": "COUVERTURE_NUAGEUSE_4",
+      "mnemonique": "75-100",
+      "label_default": "75-100 %",
+      "definition_default": "75-100 %"
+    },
+    {
+      "type":"VENT",
+      "cd_nomenclature": "VENT_0",
+      "mnemonique": "Absence_vent",
+      "label_default": "Absence de vent",
+      "definition_default": "Absence de vent"
+    },
+    {
+      "type":"VENT",
+      "cd_nomenclature": "VENT_1",
+      "mnemonique": "Vent_faible",
+      "label_default": "Vent faible",
+      "definition_default": "Vent faible"
+    },
+	{
+      "type":"VENT",
+      "cd_nomenclature": "VENT_2",
+      "mnemonique": "Vent_moyen",
+      "label_default": "Vent moyen",
+      "definition_default": "Vent moyen"
+    },
+	{
+      "type":"VENT",
+      "cd_nomenclature": "VENT_3",
+      "mnemonique": "Vent_fort",
+      "label_default": "Vent fort",
+      "definition_default": "Vent fort"
+    }
+  ]
+}

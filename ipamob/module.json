@@ -1,0 +1,13 @@
+{
+  "module_code" : "ipamob",
+  "module_label":"IPAMOB",
+  "module_desc":"Module de saisie du protocole IPAMOB - Indicateur des Papillons des Milieux Ouverts de Bretagne",
+  "b_draw_sites_group": true,
+  "map_label_field_name": "sites_group_name",
+  "genre":"M",
+  "color":"#e1fffe",
+  "export_csv": [
+    { "label": "Format observations CSV", "type":"csv" , "method": "standard" },
+    { "label": "Format analyses CSV", "type":"csv" , "method": "analyses" }
+  ]
+}

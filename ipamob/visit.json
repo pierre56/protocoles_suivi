@@ -1,0 +1,160 @@
+{
+  "genre": "M",
+  "label": "Passage",
+  "label_list": "Passages",
+  "display_properties": [
+    "id_dataset",
+    "observers",
+    "num_passage",
+    "visit_date_min",
+    "etat_paturage",
+    "etat_fauchage",
+    "etat_entretien_precedent",
+    "etat_prairie_ligneux",
+    "etat_lande_domination",
+    "etat_lande_domination_hauteur",
+    "accessibility",
+    "temperature",
+    "couverture_nuageuse",
+    "vent",
+    "comments",
+    "bool_absence"
+  ],
+  "display_list": [
+    "num_passage",
+    "visit_date_min",
+    "observers",
+    "nb_observations"
+  ],
+  "keep": [
+    "id_dataset",
+    "observers",
+    "visit_date_min",
+    "accessibility",
+    "pluviosite",
+    "temperature",
+    "couverture_nuageuse",
+    "vent",
+    "comments"
+  ],
+  "specific": {
+    "id_base_site": {
+      "type_widget": "site",
+      "required": true,
+      "attribut_label": "Transect"
+    },
+    "num_passage": {
+      "type_widget": "number",
+      "required": true,
+      "attribut_label": "Numéro de passage",
+      "min": 1,
+      "value": "({ meta}) => (meta.parents.site.properties.nb_visits + 1)"
+    },
+    "visit_date_min": {
+      "type_widget": "date",
+      "attribut_label": "Date du passage",
+      "required": true
+    },
+    "etat_paturage": {
+      "type_widget": "radio",
+      "attribut_label": "Fraîchement pâturée ?",
+      "values": ["oui", "non"],
+      "required": false,
+      "value" : "non"
+    },
+    "etat_fauchage": {
+      "type_widget": "radio",
+      "attribut_label": "Fraîchement fauchée ?",
+      "values": ["oui", "non"],
+      "required": false,
+      "value" : "non"
+    },
+  
+    "etat_entretien_precedent": {
+      "type_widget": "radio",
+      "attribut_label": "Entretenue l'année précédente ?",
+      "values": ["oui", "non"],
+      "required": false,
+      "value" : "non"
+    },
+    "etat_lande_domination": {
+      "type_widget": "select",
+      "attribut_label": "Si lande : ",
+      "values": ["dominée par les graminées", "dominée par les bruyères", "dominée par les ajoncs"],
+      "required": false
+    },
+    "etat_prairie_ligneux": {
+      "type_widget": "radio",
+      "attribut_label": "Si prairie, envahie par les ligneux :",
+      "values": ["oui", "non"],
+      "required": false
+    },
+    "etat_lande_domination_hauteur": {
+      "type_widget": "radio",
+      "attribut_label": "Si lande, hauteur :",
+      "values": ["- 50cm", "+ 50cm"],
+      "required": false
+    },
+    "accessibility": {
+       "type_widget": "radio",
+       "required": true,
+       "attribut_label": "Le site est accessible",
+       "values": ["Oui", "Non"],
+       "value": "Oui"
+    },
+    "temperature": {
+      "type_widget": "number",
+      "required": false,
+      "attribut_label": "Température estimée",
+      "min": 13,
+      "max": 45
+    },
+    "couverture_nuageuse": {
+      "type_widget": "nomenclature",
+      "attribut_label": "Couverture nuageuse",
+      "code_nomenclature_type": "COUVERTURE_NUAGEUSE",
+      "required": false,
+      "type_util": "nomenclature",
+      "hidden": "({value}) => value.accessibility === 'Non'"
+    },
+    "vent": {
+      "type_widget": "nomenclature",
+      "attribut_label": "Vent",
+      "code_nomenclature_type": "VENT",
+      "required": false,
+      "type_util": "nomenclature" ,
+      "hidden": "({value}) => value.accessibility === 'Non'"   
+    },
+    "comments": {
+      "type_widget": "textarea",
+      "attribut_label": "Commentaire"
+    },
+    "bool_absence": {
+      "type_widget": "radio",
+      "required": true,
+      "attribut_label": "Absence de papillons ?",
+      "values": ["OUI", "NON"],
+      "value": "NON"
+   },
+    "nb_observations": {
+      "attribut_label": "Nb. d'observations"
+    }
+  },
+  "change": [
+  "({objForm, meta, value}) => {",
+  "console.log('test meta');", 
+  "console.log(meta);",   
+  "console.log('log objForm');", 
+  "console.log(objForm);",  
+  "console.log('log_num_passage');",
+  "const num_passage = (meta.parents.site.properties.nb_visits + 1);",
+  "console.log(num_passage);", 
+  
+  "  if (!objForm.controls.num_passage.dirty  ) {",
+  "    objForm.patchValue({ num_passage });",
+  "  }",
+  
+  "}",
+  ""
+  ]
+}

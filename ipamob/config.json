@@ -1,0 +1,15 @@
+{
+    "tree": {
+      "module": {
+        "sites_group": {
+          "site": {
+            "visit": {
+              "observation": []
+            }
+          }
+        }
+      }
+  },
+  "user": ["__CODE_LIST_INVENTOR", "__CODE_LIST_OBSERVER"]
+}
+

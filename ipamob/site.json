@@ -1,0 +1,149 @@
+  {
+    "genre": "M",
+    "label": "Transect (entre 100 et 300m)",
+    "bChainInput": true, 
+    "label_list": "Transects",
+    "geom_field_name": "geom",
+    "geometry_type": "LineString",
+    "map_label_field_name": "base_site_name",
+    "display_properties": [
+      "id_inventor",
+      "first_use_date",
+      "base_site_code",
+      "base_site_name",
+      "radio_habitat",
+      "id_nomenclature_type_protection",
+      "base_site_description"
+    ],
+    "display_list": [
+      "base_site_name",
+      "last_visit",
+      "radio_habitat",
+      "nb_visits"
+    ],  "keep": [
+      "first_use_date",
+      "id_nomenclature_type_site",
+      "id_inventor"
+    ],
+    "specific": {
+      "id_inventor": {
+        "type_widget": "observers",
+        "attribut_label": "Descripteur du Transect",
+        "type_util": "user",
+        "code_list": "CODE_OBSERVERS_LIST",
+        "required": true,
+        "multi_select": false
+      },
+      "id_sites_group": {
+        "type_widget": "number",
+        "required": true,
+        "attribut_label": "id_sites_group",
+        "value": "({ meta}) => (meta?.parents?.properties?.id_sites_group)",
+        "hidden": true
+      },
+      "first_use_date": {
+        "type_widget": "date",
+        "attribut_label": "Date de création du transect",
+        "definition": "Date à laquelle le transect a été réalisé pour la première fois",
+        "required": true
+      },
+      "base_site_code": {
+        "type_widget": "text",
+        "attribut_label": "Code unique du transect (obligatoire)",
+        "definition": "Code unique généré automatiquement à partir de area_id du site, du nombre de transect +1",
+        "required": true,
+        "hidden": false
+      },
+      "base_site_name": {
+        "type_widget": "text",
+        "attribut_label": "Code terrain du transect (obligatoire, par défaut = Code unique)",
+        "definition": "Code du transect, utilisé sur le terrain. Par défaut, égal le code unique auto-généré",
+        "required": false
+      },
+      "radio_habitat": {
+        "type_widget": "radio",
+        "attribut_label": "Habitat du transect (obligatoire)",
+        "definition": "Habitat du transect",
+        "required": true,
+        "values": ["Pelouse", "Lande", "Prairie"],
+        "value": "Pelouse"
+      },
+      "id_nomenclature_type_protection": {
+        "type_widget": "datalist",
+        "attribut_label": "Statut de protection",
+        "definition": "Type de protection (ex: RNN, ENS, etc.)",
+        "api": "nomenclatures/nomenclature/TYP_EN",
+        "application": "GeoNature",
+        "multiple": true,
+        "keyValue": "id_nomenclature",
+        "keyLabel": "definition_fr",
+        "type_util": "nomenclature",
+        "data_path": "values",
+        "required": false,
+        "filters": {
+          "cd_nomenclature": ["APB", "ENS","SCEN", "RNN", "RNR", "SCL", "PNR", "ZNIEFF1"]
+      }
+
+      },  
+      "types_site": {
+        "type_widget": "datalist",
+        "attribut_label": "Type(s) de site",
+        "type_util": "types_site",
+        "keyValue": "id_nomenclature_type_site",
+        "keyLabel": "label",
+        "multiple": true,
+        "api": "__MONITORINGS_PATH/modules/__MODULE.MODULE_CODE/types_sites",
+        "application": "GeoNature",
+        "required": true,
+        "nullDefault": false,
+        "definition": "Permet de n'avoir que les types de site lié au module",
+        "designStyle": "bootstrap",
+        "hidden": true,
+        "value": {
+          "id_nomenclature_type_site": "1326"
+        }
+      },
+      "base_site_description": {
+        "type_widget": "textarea",
+        "attribut_label": "Description du transect",
+        "definition": "Détails supplémentaires sur le transect",
+        "required": false
+      },
+      "last_visit": {
+        "attribut_label": "Dernière visite",
+        "definition": "Date de la dernière visite sur le site",
+        "type_util": "date"
+      },
+      "nb_visits": {
+        "attribut_label": "Nombre de visites",
+        "definition": "Nombre total de visites sur le site"
+      }
+    },
+"change": [
+  "({ objForm, meta }) => {",
+  "  console.log('log meta', meta);",    
+  "  console.log('log objForm', objForm);", 
+
+  "  const id_sites_group = meta?.parents?.properties?.id_sites_group || '';",
+  "  if (id_sites_group && !objForm.controls.id_sites_group.dirty) {",
+  "    objForm.patchValue({ id_sites_group });",
+  "  }",
+
+  "  // Code existant pour base_site_code et base_site_name",
+  "  const base_site_code = ((objForm.value.id_sites_group) + '_' + (meta.parents.sites_group.properties.nb_sites + 1)).toLowerCase();",
+  "  if (!objForm.controls.base_site_code.dirty) {",
+  "    objForm.patchValue({ base_site_code });",
+  "  }",
+
+  "  const base_site_name = ((meta.parents.sites_group.properties.sites_group_name) + '_T' + (meta.parents.sites_group.properties.nb_sites + 1)).toLowerCase();",
+  "  if (!objForm.controls.base_site_name.dirty) {",
+  "    objForm.patchValue({ base_site_name });",
+  "  }",
+
+  "}"
+]
+
+
+
+
+  }

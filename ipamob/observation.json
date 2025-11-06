@@ -1,0 +1,135 @@
+{
+  "chained": true,
+  "bChainInput": true, 
+  "description_field_name": "id_observation",
+  "genre": "F",
+  "display_properties": [
+    "cd_nom",
+    "count",
+    "comments"
+  ],
+  "display_list": [
+    "cd_nom",
+    "count"
+  ],
+  "keep": [
+    "id_dataset",
+    "id_nomenclature_obj_denbr",
+    "id_nomenclature_eta_bio",
+    "id_nomenclature_stade",
+    "id_nomenclature_sex"
+  ],
+  "specific": {
+    "cd_nom": {
+      "type_widget": "taxonomy",
+      "attribut_label": "Taxon observé",
+      "type_util": "taxonomy",
+      "required": true,
+      "id_list": "__MODULE.ID_LIST_TAXONOMY"
+  },
+    "id_nomenclature_obj_denbr": {
+      "type_widget": "datalist",
+      "attribut_label": "Objet du dénombrement",
+      "api": "nomenclatures/nomenclature/OBJ_DENBR",
+      "application": "GeoNature",
+      "keyValue": "id_nomenclature",
+      "keyLabel": "label_fr",
+      "data_path": "values",
+      "type_util": "nomenclature",
+      "required": false,
+      "hidden" : true,
+      "default": {
+        "cd_nomenclature": "IND"
+      }
+    },
+    "id_nomenclature_eta_bio": {
+      "type_widget": "datalist",
+      "attribut_label": "Etat Biologique (mort/vivant)",
+      "api": "nomenclatures/nomenclature/ETA_BIO",
+      "application": "GeoNature",
+      "keyValue": "id_nomenclature",
+      "keyLabel": "label_fr",
+      "data_path": "values",
+      "type_util": "nomenclature",
+      "required": false,
+      "hidden" : true,
+      "default": {
+        "cd_nomenclature": "2"
+      }
+    },
+    "id_nomenclature_stade": {
+      "type_widget": "datalist",
+      "attribut_label": "Stade de vie",
+      "api": "nomenclatures/nomenclature/STADE_VIE",
+      "application": "GeoNature",
+      "keyValue": "id_nomenclature",
+      "keyLabel": "label_fr",
+      "data_path": "values",
+      "type_util": "nomenclature",
+      "required": false,
+      "hidden" : true,
+      "default": {
+        "cd_nomenclature": "2"
+      }
+    },
+
+    "id_nomenclature_sex": {
+      "type_widget": "datalist",
+      "attribut_label": "Sexe",
+      "api": "nomenclatures/nomenclature/SEXE",
+      "application": "GeoNature",
+      "keyValue": "id_nomenclature",
+      "keyLabel": "label_fr",
+      "data_path": "values",
+      "type_util": "nomenclature",
+      "required": false,
+      "hidden" : true,
+      "filters": {
+        "cd_nomenclature": ["1", "2", "3", "5"]
+      },
+      "default": {
+        "cd_nomenclature": "1"
+      }
+    },
+    "id_nomenclature_typ_denbr": {
+      "type_widget": "datalist",
+      "attribut_label": "Type de dénombrement",
+      "api": "nomenclatures/nomenclature/TYP_DENBR",
+      "application": "GeoNature",
+      "keyValue": "id_nomenclature",
+      "keyLabel": "label_fr",
+      "data_path": "values",
+      "type_util": "nomenclature",
+      "required": false,
+      "hidden" : true,
+      "filters": {
+        "cd_nomenclature": ["Co", "Es"]
+      },
+      "default": {
+        "cd_nomenclature": "Co"
+      }
+    },
+    "count": {
+      "type_widget": "number",
+      "attribut_label": "Nombre total",
+      "required": true,
+      "min": 1,
+      "value": 1
+    },
+    "comments": {
+      "type_widget": "textarea",
+      "attribut_label": "Commentaire"
+    }
+
+  },
+"change": [
+  "({objForm, meta, value}) => {",
+  "console.log('log meta', meta);",    
+  "console.log('log objForm', objForm);", 
+  "console.log('test value');", 
+  "console.log(value);",     
+  "}",
+  ""
+]
+
+}
