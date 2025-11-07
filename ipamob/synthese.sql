@@ -19,6 +19,7 @@
 -- ne pas remplacer cette variable, elle est indispensable pour les scripts d'installations
 -- le module pouvant être installé avec un code différent de l'original
 
+
 DROP VIEW IF EXISTS gn_monitoring.v_synthese_monitoring;
 
 CREATE OR REPLACE VIEW gn_monitoring.v_synthese_monitoring AS
@@ -97,17 +98,12 @@ module_types AS (
       LEFT JOIN gn_monitoring.bib_type_site bts
         ON bts.id_nomenclature_type_site = cmt.id_type_site
      GROUP BY cmt.id_module
-),
-SELECT
+)
+select
+    m.module_code,
     v.id_module,
     mc.uuid_module_complement,
-    mc.id_list_observer,
-    mc.id_list_taxonomy,
-    mc.b_synthese,
-    mc.taxonomy_display_field_name,
-    mc.b_draw_sites_group,
     mc.data AS module_complements_data,
-    mc.cd_nom AS module_cd_nom,
     mt.module_types_data,
     sg.id_sites_group,
     sg.sites_group_name,
@@ -123,7 +119,6 @@ SELECT
     sg.geom_local AS sites_group_geom_local,
     sg.altitude_min AS sites_group_altitude_min,
     sg.altitude_max AS sites_group_altitude_max,
-    sgm.sites_group_modules_data,
     bs.id_base_site,
     bs.uuid_base_site,
     bs.base_site_name,
@@ -194,6 +189,8 @@ LEFT JOIN gn_monitoring.t_individuals ind
   ON ind.id_individual = o.id_individual
 LEFT JOIN gn_monitoring.t_module_complements mc
   ON mc.id_module = v.id_module
+LEFT JOIN gn_commons.t_modules m
+  ON m.id_module = v.id_module
 LEFT JOIN marking_events me
   ON me.id_individual = o.id_individual
 LEFT JOIN site_modules sm
@@ -210,6 +207,8 @@ LEFT JOIN individual_modules im
   ON im.id_individual = o.id_individual
 LEFT JOIN module_types mt
   ON mt.id_module = v.id_module;
+
+------
 
 DROP VIEW IF EXISTS gn_monitoring.v_synthese_:module_code;
 
