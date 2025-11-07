@@ -19,6 +19,198 @@
 -- ne pas remplacer cette variable, elle est indispensable pour les scripts d'installations
 -- le module pouvant être installé avec un code différent de l'original
 
+DROP VIEW IF EXISTS gn_monitoring.v_synthese_monitoring;
+
+CREATE OR REPLACE VIEW gn_monitoring.v_synthese_monitoring AS
+WITH observation_details AS (
+    SELECT od.id_observation,
+           jsonb_agg(to_jsonb(od) - 'id_observation') AS observation_details_data
+      FROM gn_monitoring.t_observation_details od
+     GROUP BY od.id_observation
+),
+marking_events AS (
+    SELECT me.id_individual,
+           jsonb_agg(to_jsonb(me) - 'id_individual') AS marking_events_data
+      FROM gn_monitoring.t_marking_events me
+     GROUP BY me.id_individual
+),
+site_modules AS (
+    SELECT csm.id_base_site,
+           jsonb_agg(to_jsonb(csm) - 'id_base_site') AS site_modules_data
+      FROM gn_monitoring.cor_site_module csm
+     GROUP BY csm.id_base_site
+),
+site_types AS (
+    SELECT cst.id_base_site,
+           jsonb_agg(
+               jsonb_build_object(
+                   'id_type_site', cst.id_type_site,
+                   'bib_type_site', to_jsonb(bts)
+               )
+           ) AS site_types_data
+      FROM gn_monitoring.cor_site_type cst
+      LEFT JOIN gn_monitoring.bib_type_site bts
+        ON bts.id_nomenclature_type_site = cst.id_type_site
+     GROUP BY cst.id_base_site
+),
+site_areas AS (
+    SELECT csa.id_base_site,
+           jsonb_agg(to_jsonb(csa) - 'id_base_site') AS site_areas_data
+      FROM gn_monitoring.cor_site_area csa
+     GROUP BY csa.id_base_site
+),
+site_group_modules AS (
+    SELECT csgm.id_sites_group,
+           jsonb_agg(to_jsonb(csgm) - 'id_sites_group') AS sites_group_modules_data
+      FROM gn_monitoring.cor_sites_group_module csgm
+     GROUP BY csgm.id_sites_group
+),
+visit_observers AS (
+    SELECT cvo.id_base_visit,
+           jsonb_agg(
+               (to_jsonb(cvo) - 'id_base_visit') ||
+               jsonb_build_object(
+                   'nom_role', r.nom_role,
+                   'prenom_role', r.prenom_role
+               )
+           ) AS visit_observers_data
+      FROM gn_monitoring.cor_visit_observer cvo
+      LEFT JOIN utilisateurs.t_roles r
+        ON r.id_role = cvo.id_role
+     GROUP BY cvo.id_base_visit
+),
+individual_modules AS (
+    SELECT cim.id_individual,
+           jsonb_agg(to_jsonb(cim) - 'id_individual') AS individual_modules_data
+      FROM gn_monitoring.cor_individual_module cim
+     GROUP BY cim.id_individual
+),
+module_types AS (
+    SELECT cmt.id_module,
+           jsonb_agg(
+               jsonb_build_object(
+                   'id_type_site', cmt.id_type_site,
+                   'bib_type_site', to_jsonb(bts)
+               )
+           ) AS module_types_data
+      FROM gn_monitoring.cor_module_type cmt
+      LEFT JOIN gn_monitoring.bib_type_site bts
+        ON bts.id_nomenclature_type_site = cmt.id_type_site
+     GROUP BY cmt.id_module
+),
+SELECT
+    v.id_module,
+    mc.uuid_module_complement,
+    mc.id_list_observer,
+    mc.id_list_taxonomy,
+    mc.b_synthese,
+    mc.taxonomy_display_field_name,
+    mc.b_draw_sites_group,
+    mc.data AS module_complements_data,
+    mc.cd_nom AS module_cd_nom,
+    mt.module_types_data,
+    sg.id_sites_group,
+    sg.sites_group_name,
+    sg.sites_group_code,
+    sg.sites_group_description,
+    sg.uuid_sites_group,
+    sg.comments AS sites_group_comments,
+    sg.data AS sites_group_data,
+    sg.meta_create_date AS sites_group_create_date,
+    sg.meta_update_date AS sites_group_update_date,
+    sg.id_digitiser AS sites_group_id_digitiser,
+    sg.geom AS sites_group_geom,
+    sg.geom_local AS sites_group_geom_local,
+    sg.altitude_min AS sites_group_altitude_min,
+    sg.altitude_max AS sites_group_altitude_max,
+    sgm.sites_group_modules_data,
+    bs.id_base_site,
+    bs.uuid_base_site,
+    bs.base_site_name,
+    bs.base_site_description,
+    bs.base_site_code,
+    bs.first_use_date,
+    bs.id_inventor,
+    bs.id_digitiser AS site_id_digitiser,
+    bs.geom,
+    bs.geom_local,
+    bs.altitude_min,
+    bs.altitude_max,
+    bs.meta_create_date AS site_create_date,
+    bs.meta_update_date AS site_update_date,
+    sc.data AS site_complements_data,
+    sm.site_modules_data,
+    st.site_types_data,
+    sa.site_areas_data,
+    v.id_base_visit,
+    v.uuid_base_visit,
+    v.id_dataset,
+    v.id_digitiser AS visit_id_digitiser,
+    v.visit_date_min,
+    v.visit_date_max,
+    v.id_nomenclature_tech_collect_campanule,
+    v.id_nomenclature_grp_typ,
+    v.comments AS visit_comments,
+    v.meta_create_date AS visit_create_date,
+    v.meta_update_date AS visit_update_date,
+    v.observers_txt,
+    vc.data AS visit_complements_data,
+    vo.visit_observers_data,
+    o.id_observation,
+    o.uuid_observation,
+    o.cd_nom,
+    o.comments AS observation_comments,
+    o.id_digitiser AS observation_id_digitiser,
+    o.id_individual,
+    oc.data AS observation_complements_data,
+    od.observation_details_data,
+    ind.uuid_individual,
+    ind.individual_name,
+    ind.cd_nom AS individual_cd_nom,
+    ind.id_nomenclature_sex AS individual_id_nomenclature_sex,
+    ind.active AS individual_active,
+    ind.comment AS individual_comment,
+    ind.id_digitiser AS individual_id_digitiser,
+    ind.meta_create_date AS individual_create_date,
+    ind.meta_update_date AS individual_update_date,
+    im.individual_modules_data,
+    me.marking_events_data
+FROM gn_monitoring.t_observations o
+JOIN gn_monitoring.t_base_visits v
+  ON v.id_base_visit = o.id_base_visit
+LEFT JOIN gn_monitoring.t_base_sites bs
+  ON bs.id_base_site = v.id_base_site
+LEFT JOIN gn_monitoring.t_site_complements sc
+  ON sc.id_base_site = bs.id_base_site
+LEFT JOIN gn_monitoring.t_sites_groups sg
+  ON sg.id_sites_group = sc.id_sites_group
+LEFT JOIN gn_monitoring.t_visit_complements vc
+  ON vc.id_base_visit = v.id_base_visit
+LEFT JOIN gn_monitoring.t_observation_complements oc
+  ON oc.id_observation = o.id_observation
+LEFT JOIN observation_details od
+  ON od.id_observation = o.id_observation
+LEFT JOIN gn_monitoring.t_individuals ind
+  ON ind.id_individual = o.id_individual
+LEFT JOIN gn_monitoring.t_module_complements mc
+  ON mc.id_module = v.id_module
+LEFT JOIN marking_events me
+  ON me.id_individual = o.id_individual
+LEFT JOIN site_modules sm
+  ON sm.id_base_site = v.id_base_site
+LEFT JOIN site_types st
+  ON st.id_base_site = v.id_base_site
+LEFT JOIN site_areas sa
+  ON sa.id_base_site = v.id_base_site
+LEFT JOIN site_group_modules sgm
+  ON sgm.id_sites_group = sc.id_sites_group
+LEFT JOIN visit_observers vo
+  ON vo.id_base_visit = v.id_base_visit
+LEFT JOIN individual_modules im
+  ON im.id_individual = o.id_individual
+LEFT JOIN module_types mt
+  ON mt.id_module = v.id_module;
+
 DROP VIEW IF EXISTS gn_monitoring.v_synthese_:module_code;
 
 CREATE OR REPLACE VIEW gn_monitoring.v_synthese_:module_code
