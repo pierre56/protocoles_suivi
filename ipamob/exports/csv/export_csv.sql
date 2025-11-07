@@ -1,12 +1,12 @@
 ---------------------------------------------------POPAmphibien standard------------------------------------------
--- View: gn_monitoring.v_export_popamphibien_standard
+-- View: gn_monitoring.v_export_ipamob
 -- Export avec une entrée observations, permettant de récupérer les occurrences d'observations avec l'ensemble
 -- des attributs spécifiques du protocole. Ne renvoie pas les visites sans observations.
 -- Version du 18 avril 2022
 
-DROP VIEW IF EXISTS gn_monitoring.v_export_popamphibien_standard;
+DROP VIEW IF EXISTS gn_monitoring.v_export_ipamob;
 
-CREATE OR REPLACE VIEW gn_monitoring.v_export_popamphibien_standard AS
+CREATE OR REPLACE VIEW gn_monitoring.v_export_ipamob AS
 SELECT
     /* MODULE */
     m.module_code,
@@ -148,7 +148,7 @@ LEFT JOIN gn_monitoring.t_sites_groups sg
 /* ---------- sg.data->'commune' -> noms de communes ---------- */
 LEFT JOIN LATERAL (
     SELECT
-        /* noms de communes (ordre conserve via ordinality) */
+        /* noms de communes */
         COALESCE(
           array_agg(la.area_name ORDER BY c.ord)
             FILTER (WHERE la.area_name IS NOT NULL),
@@ -175,12 +175,12 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL ref_geo.fct_get_altitude_intersection(bs.geom_local) alt(altitude_min, altitude_max)
   ON TRUE
 
-/* ---------- FIX #2 : protections -> libelles seulement ---------- */
+/* ---------- protections -> libelles seulement ---------- */
 LEFT JOIN LATERAL (
     SELECT
         NULLIF(NULLIF(sc.data::jsonb ->> 'radio_habitat', ''), 'null') AS site_radio_habitat,
 
-        /* text[] des labels (ordre conserve via WITH ORDINALITY) */
+        /* text[] des labels  */
         COALESCE(
           array_agg(ref_nomenclatures.get_nomenclature_label(p.protection_id, 'fr') ORDER BY p.ord)
             FILTER (WHERE p.protection_id IS NOT NULL),
