@@ -1,8 +1,6 @@
----------------------------------------------------POPAmphibien standard------------------------------------------
+----- IPAMOB -----
 -- View: gn_monitoring.v_export_ipamob
--- Export avec une entrée observations, permettant de récupérer les occurrences d'observations avec l'ensemble
--- des attributs spécifiques du protocole. Ne renvoie pas les visites sans observations.
--- Version du 18 avril 2022
+-- Export avec une entrée observations, permettant de récupérer les occurrences d'observations avec l'ensemble des attributs spécifiques du protocole
 
 DROP VIEW IF EXISTS gn_monitoring.v_export_ipamob;
 
