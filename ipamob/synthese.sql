@@ -233,83 +233,6 @@ AS WITH source AS (
     ref_nomenclatures.get_id_nomenclature('ETAT_BIO'::character varying, '1'::character varying) as id_nomenclature_bio_condition,
     ref_nomenclatures.get_id_nomenclature('STATUT_SOURCE'::character varying, 'Te'::character varying) AS id_nomenclature_source_status,
     ref_nomenclatures.get_id_nomenclature('TYP_INF_GEO'::character varying, '1'::character varying) AS id_nomenclature_info_geo_type,
-    nullif(((oc.data::json #> '{count_min}'::text[])::text),'null')::integer AS count_min,
-    nullif(((oc.data::json #> '{count_max}'::text[])::text),'null')::integer AS count_max,
-    o.id_observation,
-    o.cd_nom,
-    t.nom_complet AS nom_cite,
-    alt.altitude_min,
-    alt.altitude_max,
-    s.geom AS the_geom_4326,
-    st_centroid(s.geom) AS the_geom_point,
-    s.geom_local AS the_geom_local,
-    v.visit_date_min AS date_min,
-    v.visit_date_min AS date_max,
-    obs.observers,
-    v.id_digitiser,
-    ref_nomenclatures.get_id_nomenclature('METH_DETERMIN'::character varying, '1'::character varying) AS id_nomenclature_determination_method,
-    v.id_module as id_module,
-    v.comments AS comment_context,
-    o.comments AS comment_description,
-    obs.ids_observers,
-    v.id_base_site,
-    v.id_base_visit, 
-    json_build_object(
-      'aire_etude', tsg.sites_group_name,
-      'nom_site', s.base_site_name,
-      'milieu_aquatique', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'milieu_aquatique')::text,'null')::integer, 'fr'),
-      'variation_eau', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'variation_eau')::text,'null')::integer, 'fr'),
-      'courant',  ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'courant')::text,'null')::integer, 'fr'),
-    	'num_passage', json_extract_path(vc.data::json,'num_passage')::text, 
-    	'accessibilite', (vc.data::json #> '{accessibility}'::text[]),
-    	'pluviosite', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'pluviosite')::text,'null')::integer, 'fr'),
-    	'couverture_nuageuse', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'couverture_nuageuse')::text,'null')::integer, 'fr'),
-    	'vent', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'vent')::text,'null')::integer, 'fr'),
-    	'turbidite', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'turbidite')::text,'null')::integer, 'fr'),
-    	'vegetation_aquatique_principale', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'vegetation_aquatique_principale')::text,'null')::integer, 'fr'),
-    	'rives', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'rives')::text,'null')::integer, 'fr'),
-    	'habitat_terrestre_environnant', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'habitat_terrestre_environnant')::text,'null')::integer, 'fr'),
-    	'activite_humaine', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'activite_humaine')::text,'null')::integer, 'fr')
-    	) as additional_data
-   FROM gn_monitoring.t_base_visits v
-   	 JOIN gn_monitoring.t_visit_complements vc on v.id_base_visit = vc.id_base_visit 
-     JOIN gn_monitoring.t_base_sites s ON s.id_base_site = v.id_base_site
-     JOIN gn_monitoring.t_site_complements sc on sc.id_base_site = s.id_base_site
-     JOIN gn_monitoring.t_sites_groups tsg ON sc.id_sites_group = tsg.id_sites_group
-     JOIN gn_commons.t_modules m ON m.id_module = v.id_module
-     JOIN gn_monitoring.t_observations o ON o.id_base_visit = v.id_base_visit
-     JOIN gn_monitoring.t_observation_complements oc ON oc.id_observation = o.id_observation
-     JOIN taxonomie.taxref t ON t.cd_nom = o.cd_nom
-     LEFT JOIN LATERAL ( SELECT array_agg(r.id_role) AS ids_observers,
-            string_agg(concat(r.nom_role, ' ', r.prenom_role), ' ; '::text) AS observers
-           FROM gn_monitoring.cor_visit_observer cvo
-             JOIN utilisateurs.t_roles r ON r.id_role = cvo.id_role
-          WHERE cvo.id_base_visit = v.id_base_visit) obs ON true
-     LEFT JOIN LATERAL ref_geo.fct_get_altitude_intersection(s.geom_local) alt(altitude_min, altitude_max) ON true
-    WHERE m.module_code = :'module_code';
-
-drop VIEW if exists  gn_monitoring.v_synthese_ipamob_v2 ;
-CREATE OR REPLACE VIEW gn_monitoring.v_synthese_ipamob_v2
-AS WITH source AS (
-         SELECT id_source
-           FROM gn_synthese.t_sources
-          WHERE name_source = CONCAT('MONITORING_', UPPER('ipamob'))
-        )
- SELECT 
- 	o.uuid_observation AS unique_id_sinp,
-    v.uuid_base_visit AS unique_id_sinp_grp,
-    (SELECT id_source FROM source) AS id_source,
-    o.id_observation AS entity_source_pk_value,
-    v.id_dataset,
-    ref_nomenclatures.get_id_nomenclature('METH_OBS'::character varying, '20'::character varying) AS id_nomenclature_obs_meth, 
-    nullif(json_extract_path(oc.data::json,'id_nomenclature_stade')::text,'null')::integer AS id_nomenclature_life_stage,
-    nullif(json_extract_path(oc.data::json,'id_nomenclature_sex')::text,'null')::integer AS id_nomenclature_sex,
-    ref_nomenclatures.get_id_nomenclature('OBJ_DENBR'::character varying, 'IND'::character varying) AS id_nomenclature_obj_count,
-    nullif(json_extract_path(oc.data::json,'id_nomenclature_typ_denbr')::text, 'null')::integer AS id_nomenclature_type_count,
-    ref_nomenclatures.get_id_nomenclature('STATUT_OBS'::character varying, 'Pr'::character varying) AS id_nomenclature_observation_status,
-    ref_nomenclatures.get_id_nomenclature('ETAT_BIO'::character varying, '1'::character varying) as id_nomenclature_bio_condition,
-    ref_nomenclatures.get_id_nomenclature('STATUT_SOURCE'::character varying, 'Te'::character varying) AS id_nomenclature_source_status,
-    ref_nomenclatures.get_id_nomenclature('TYP_INF_GEO'::character varying, '1'::character varying) AS id_nomenclature_info_geo_type,
     nullif(((oc.data::json #> '{count}'::text[])::text),'null')::integer AS count_min,
     nullif(((oc.data::json #> '{count}'::text[])::text),'null')::integer AS count_max,
     o.id_observation,
@@ -332,23 +255,28 @@ AS WITH source AS (
     tsg.id_sites_group,
     v.id_base_site,
     v.id_base_visit, 
-    json_build_object(
-      'aire_etude', tsg.sites_group_name,
-      'nom_site', s.base_site_name,
-      'habitat_transect', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'radio_habitat')::text,'null')::integer, 'fr'),
-      'type_protection', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'id_nomenclature_type_protection')::text,'null')::integer, 'fr'),
-      'courant',  ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(sc.data::json,'courant')::text,'null')::integer, 'fr'),
-    	'num_passage', json_extract_path(vc.data::json,'num_passage')::text, 
-    	'accessibilite', (vc.data::json #> '{accessibility}'::text[]),
-    	'pluviosite', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'pluviosite')::text,'null')::integer, 'fr'),
-    	'couverture_nuageuse', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'couverture_nuageuse')::text,'null')::integer, 'fr'),
-    	'vent', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'vent')::text,'null')::integer, 'fr'),
-    	'turbidite', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'turbidite')::text,'null')::integer, 'fr'),
-    	'vegetation_aquatique_principale', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'vegetation_aquatique_principale')::text,'null')::integer, 'fr'),
-    	'rives', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'rives')::text,'null')::integer, 'fr'),
-    	'habitat_terrestre_environnant', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'habitat_terrestre_environnant')::text,'null')::integer, 'fr'),
-    	'activite_humaine', ref_nomenclatures.get_nomenclature_label(nullif(json_extract_path(vc.data::json,'activite_humaine')::text,'null')::integer, 'fr')
-    	) as additional_data
+    jsonb_build_object(
+        'aire_etude', tsg.sites_group_name,
+        'code_aire_etude', tsg.sites_group_code,
+        'communes_aire_etude', sg_info.sites_group_communes,
+        'id_inventeur_aire_etude', sg_info.sites_group_id_inventor,
+        'nom_site', s.base_site_name,
+        'code_site', s.base_site_code,
+        'habitat_transect', site_info.habitat_transect_label,
+        'types_protection', site_info.type_protection_labels,
+        'num_passage', visit_info.num_passage,
+        'bool_absence', visit_info.bool_absence,
+        'accessibilite', visit_info.accessibility,
+        'couverture_nuageuse', visit_info.couverture_nuageuse_label,
+        'vent', visit_info.vent_label,
+        'temperature', visit_info.temperature,
+        'etat_fauchage', visit_info.etat_fauchage,
+        'etat_paturage', visit_info.etat_paturage,
+        'etat_entretien_precedent', visit_info.etat_entretien_precedent,
+        'etat_prairie_ligneux', visit_info.etat_prairie_ligneux,
+        'etat_lande_domination', visit_info.etat_lande_domination,
+        'etat_lande_domination_hauteur', visit_info.etat_lande_domination_hauteur
+    ) AS additional_data
    FROM gn_monitoring.t_base_visits v
    	 JOIN gn_monitoring.t_visit_complements vc on v.id_base_visit = vc.id_base_visit 
      JOIN gn_monitoring.t_base_sites s ON s.id_base_site = v.id_base_site
@@ -358,10 +286,77 @@ AS WITH source AS (
      JOIN gn_monitoring.t_observations o ON o.id_base_visit = v.id_base_visit
      JOIN gn_monitoring.t_observation_complements oc ON oc.id_observation = o.id_observation
      JOIN taxonomie.taxref t ON t.cd_nom = o.cd_nom
+     LEFT JOIN LATERAL (
+        SELECT
+            COALESCE(
+                array_agg(la.area_name ORDER BY c.ord)
+                    FILTER (WHERE la.area_name IS NOT NULL),
+                '{}'::text[]
+            ) AS sites_group_communes,
+            NULLIF(NULLIF(sg.data::jsonb ->> 'id_inventor', ''), 'null')::integer AS sites_group_id_inventor
+        FROM (
+            SELECT
+                NULLIF(NULLIF(value, ''), 'null')::integer AS id_area,
+                ord
+            FROM jsonb_array_elements_text(
+                CASE
+                    WHEN jsonb_typeof(sg.data::jsonb -> 'commune') = 'array' THEN sg.data::jsonb -> 'commune'
+                    WHEN jsonb_typeof(sg.data::jsonb -> 'commune') IS NULL THEN '[]'::jsonb
+                    ELSE jsonb_build_array(sg.data::jsonb -> 'commune')
+                END
+            ) WITH ORDINALITY AS t(value, ord)
+        ) AS c
+        LEFT JOIN ref_geo.l_areas la
+          ON la.id_area = c.id_area
+     ) sg_info ON TRUE
+     LEFT JOIN LATERAL (
+        SELECT
+            ref_nomenclatures.get_nomenclature_label(
+                NULLIF(NULLIF(sc.data::jsonb ->> 'radio_habitat', ''), 'null')::integer,
+                'fr'
+            ) AS habitat_transect_label,
+            COALESCE(
+                array_agg(ref_nomenclatures.get_nomenclature_label(p.protection_id, 'fr') ORDER BY p.ord)
+                    FILTER (WHERE p.protection_id IS NOT NULL),
+                '{}'::text[]
+            ) AS type_protection_labels
+        FROM (
+            SELECT
+                NULLIF(NULLIF(value, ''), 'null')::integer AS protection_id,
+                ord
+            FROM jsonb_array_elements_text(
+                CASE
+                    WHEN jsonb_typeof(sc.data::jsonb -> 'id_nomenclature_type_protection') = 'array'
+                        THEN sc.data::jsonb -> 'id_nomenclature_type_protection'
+                    WHEN jsonb_typeof(sc.data::jsonb -> 'id_nomenclature_type_protection') IS NULL
+                        THEN '[]'::jsonb
+                    ELSE jsonb_build_array(sc.data::jsonb -> 'id_nomenclature_type_protection')
+                END
+            ) WITH ORDINALITY AS t(value, ord)
+        ) AS p
+     ) site_info ON TRUE
+     LEFT JOIN LATERAL (
+        SELECT
+            NULLIF(NULLIF(vc.data::jsonb ->> 'bool_absence', ''), 'null') AS bool_absence,
+            vc.data::jsonb -> 'accessibility' AS accessibility,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_fauchage', ''), 'null') AS etat_fauchage,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_paturage', ''), 'null') AS etat_paturage,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_entretien_precedent', ''), 'null') AS etat_entretien_precedent,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'vent', ''), 'null')::integer AS vent_id,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'num_passage', ''), 'null') AS num_passage,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'temperature', ''), 'null') AS temperature,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'couverture_nuageuse', ''), 'null')::integer AS couverture_nuageuse_id,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_prairie_ligneux', ''), 'null') AS etat_prairie_ligneux,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_lande_domination', ''), 'null') AS etat_lande_domination,
+            NULLIF(NULLIF(vc.data::jsonb ->> 'etat_lande_domination_hauteur', ''), 'null') AS etat_lande_domination_hauteur,
+            ref_nomenclatures.get_nomenclature_label(NULLIF(NULLIF(vc.data::jsonb ->> 'couverture_nuageuse', ''), 'null')::integer, 'fr') AS couverture_nuageuse_label,
+            ref_nomenclatures.get_nomenclature_label(NULLIF(NULLIF(vc.data::jsonb ->> 'vent', ''), 'null')::integer, 'fr') AS vent_label
+        ) visit_info ON TRUE
      LEFT JOIN LATERAL ( SELECT array_agg(r.id_role) AS ids_observers,
             string_agg(concat(r.nom_role, ' ', r.prenom_role), ' ; '::text) AS observers
            FROM gn_monitoring.cor_visit_observer cvo
              JOIN utilisateurs.t_roles r ON r.id_role = cvo.id_role
           WHERE cvo.id_base_visit = v.id_base_visit) obs ON true
      LEFT JOIN LATERAL ref_geo.fct_get_altitude_intersection(s.geom_local) alt(altitude_min, altitude_max) ON true
-    WHERE m.module_code = 'ipamob';
+    WHERE m.module_code = :'module_code';
+

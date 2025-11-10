@@ -3,12 +3,12 @@
     {
       "mnemonique": "COUVERTURE_NUAGEUSE",
       "label_default": "Couverture nuageuse",
-      "definition_default": "couverture nuageuse (protocôle de suivi POPAmphibien)"
+      "definition_default": "couverture nuageuse"
     },
     {
       "mnemonique": "VENT",
       "label_default": "Vent",
-      "definition_default": "vent (protocôle de suivi POPAmphibien)"
+      "definition_default": "vent"
     }
   ],
   "nomenclatures": [
