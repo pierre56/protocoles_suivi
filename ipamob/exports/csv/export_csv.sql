@@ -2,9 +2,9 @@
 -- View: gn_monitoring.v_export_ipamob
 -- Export avec une entrée observations, permettant de récupérer les occurrences d'observations avec l'ensemble des attributs spécifiques du protocole
 
-DROP VIEW IF EXISTS gn_monitoring.v_export_ipamob;
+DROP VIEW IF EXISTS gn_monitoring.v_export_ipamob_standard;
 
-CREATE OR REPLACE VIEW gn_monitoring.v_export_ipamob AS
+CREATE OR REPLACE VIEW gn_monitoring.v_export_ipamob_standard AS
 SELECT
     /* MODULE */
     m.module_code,
@@ -335,3 +335,5 @@ LEFT JOIN gn_monitoring.t_individuals ind
 */
 
 WHERE m.module_code = 'ipamob';
+
+GRANT SELECT ON TABLE gn_monitoring.v_export_ipamob TO geonatadmin;
