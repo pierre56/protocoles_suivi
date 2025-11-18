@@ -1,5 +1,5 @@
 ----- IPAMOB -----
--- View: gn_monitoring.v_export_ipamob
+-- View: gn_monitoring.v_export_ipamob_standard
 -- Export avec une entrée observations, permettant de récupérer les occurrences d'observations avec l'ensemble des attributs spécifiques du protocole
 
 DROP VIEW IF EXISTS gn_monitoring.v_export_ipamob_standard;
@@ -24,8 +24,12 @@ SELECT
     sg.meta_create_date AS sites_group_create_date,
     sg.meta_update_date AS sites_group_update_date,
     sg.id_digitiser AS sites_group_id_digitiser,
-    sg.geom AS sites_group_geom,
-    sg.geom_local AS sites_group_geom_local,
+    -- sg.geom AS sites_group_geom,
+    -- sg.geom_local AS sites_group_geom_local,
+    st_astext(sg.geom) AS geom_sites_group_wkt,
+    st_astext(sg.geom_local) AS geom_local_sites_group_wkt,
+    st_asgeojson(sg.geom) AS geom_sites_group_geojson,
+    st_asgeojson(sg.geom_local) AS geom_local_sites_group_geojson,
     sg.altitude_min AS sites_group_altitude_min,
     sg.altitude_max AS sites_group_altitude_max,
     sites_group_info.sites_group_communes AS sites_group_commune,
@@ -40,9 +44,12 @@ SELECT
     bs.first_use_date,
     bs.id_inventor,
     bs.id_digitiser AS site_id_digitiser,
-    bs.geom,
-    bs.geom_local,
-    bs.altitude_min,
+    -- bs.geom,
+    -- bs.geom_local,
+    st_astext(bs.geom) AS geom_wkt,
+    st_astext(bs.geom_local) AS geom_local_wkt,
+    st_asgeojson(bs.geom) AS geom_geojson,
+    st_asgeojson(bs.geom_local) AS geom_local_geojson,    bs.altitude_min,
     bs.altitude_max,
     bs.meta_create_date AS site_create_date,
     bs.meta_update_date AS site_update_date,
@@ -336,4 +343,4 @@ LEFT JOIN gn_monitoring.t_individuals ind
 
 WHERE m.module_code = 'ipamob';
 
-GRANT SELECT ON TABLE gn_monitoring.v_export_ipamob TO geonatadmin;
+GRANT SELECT ON TABLE gn_monitoring.v_export_ipamob_standard TO geonatadmin;
