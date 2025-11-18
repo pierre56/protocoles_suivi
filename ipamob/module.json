@@ -7,7 +7,8 @@
   "genre":"M",
   "color":"#e1fffe",
   "export_csv": [
-    { "label": "Format observations CSV", "type":"csv" , "method": "standard" },
-    { "label": "Format analyses CSV", "type":"csv" , "method": "analyses" }
+    { "label": "Format observations CSV", "type":"csv" , "method": "standard", "filter_dataset": true },
+    { "label": "Format observations CSV", "type":"csv" , "method": "standard"}
+  
   ]
 }
