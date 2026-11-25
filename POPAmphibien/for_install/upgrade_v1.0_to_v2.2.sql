@@ -26,7 +26,7 @@ CREATE TABLE backup_pop_amphibien.tmp_bkp_monitoring_popa AS (SELECT
 	JOIN gn_monitoring.t_observation_complements oc ON oc.id_observation = o.id_observation
 	LEFT JOIN gn_commons.t_medias tm ON (tm.id_table_location = gn_commons.get_table_location_id('gn_monitoring', 't_observations') AND tm.uuid_attached_row = o.uuid_observation)
 	JOIN taxonomie.taxref t ON t.cd_nom = o.cd_nom
-	WHERE m.module_code ilike 'popamphibien';
+	WHERE m.module_code ilike 'popamphibien');
 
 -- On sauvegarde aussi les nomenclatures qu'on suppprimera pour garder une correspondance des IDs !
 CREATE TABLE backup_pop_amphibien.tmp_bkp_monitoring_popa_nomenclature AS (SELECT
